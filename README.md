@@ -1,6 +1,6 @@
 <h2 align="center">PI (Project Initialization)</h2>
 
-**PI**, standing for *Project Initialization*, is a simple shell script tool for constructing personal projects in one step, like integrating Webpack, Babel, React, ESLint, Unit-Testing Frameworks, etc.
+**PI**, standing for *Project Initialization*, is a simple shell script tool for constructing personal projects (temporary NPM projects) in one step, like integrating Webpack, Babel, React, ESLint, Unit-Testing Frameworks, etc.
 
 As a common share project, you can use it directly. The first step you should do is to install it by cloning the project to the local disk recursively as there is a sub-module for managing configuration files.
 
