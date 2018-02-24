@@ -153,6 +153,7 @@ if (!opt.options.project) {
             name: 'Babel',
             shell: {
                 devDependencies: [
+                    'babel-cli@6.26.0',
                     'babel-preset-es2015@6.13.2',
                     'babel-core@6.13.2'
                 ].concat(opt.options.webpack ? ['babel-loader@6.2.5'] : [])
@@ -175,6 +176,15 @@ if (!opt.options.project) {
                             ]
                         }
                     `));
+                }
+
+                if (!opt.options.webpack && fs.existsSync(path.resolve(root, 'package.json'))) {
+                    /** set a building script into package.json */
+                    const content = JSON.parse(fs.readFileSync(path.resolve(root, 'package.json'), { encoding: 'utf8' }));
+                    content.scripts = content.scripts || {};
+                    content.scripts.watch = 'node ./node_modules/babel-cli/bin/babel.js -w src -d dist';
+                    content.scripts.build = 'node ./node_modules/babel-cli/bin/babel.js src -d dist';
+                    fs.writeFileSync(path.resolve(root, 'package.json'), JSON.stringify(content, null, 2));
                 }
             },
         },
