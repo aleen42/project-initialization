@@ -20,7 +20,7 @@ For more information about usage of the script, you can pass it a parameter `-h`
 
 ### :fuelpump: How to contribute
 
-Have an idea? Found a bug? See [how to contribute](https://aleen42.gitbooks.io/personalwiki/content/contribution.html).
+Have an idea? Found a bug? See [how to contribute](https://aleen42.github.io/PersonalWiki/contribution.html).
 
 ### :scroll: License
 
