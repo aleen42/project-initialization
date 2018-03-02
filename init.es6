@@ -1,28 +1,30 @@
-/******************************************************************
- *                                                                _
- * 	 _____  _                           ____  _                 |_|
- *	|  _  |/ \   ____  ____ __ ___     / ___\/ \   __   _  ____  _
- *	| |_| || |  / __ \/ __ \\ '_  \ _ / /    | |___\ \ | |/ __ \| |
- *	|  _  || |__. ___/. ___/| | | ||_|\ \___ |  _  | |_| |. ___/| |
- *	|_/ \_|\___/\____|\____||_| |_|    \____/|_| |_|_____|\____||_|
+/********************************************************************
+ *                                                                 _
+ *     _____  _                           ____  _                 |_|
+ *    |  _  |/ \   ____  ____ __ ___     / ___\/ \   __   _  ____  _
+ *    | |_| || |  / __ \/ __ \\ '_  \ _ / /    | |___\ \ | |/ __ \| |
+ *    |  _  || |__. ___/. ___/| | | ||_|\ \___ |  _  | |_| |. ___/| |
+ *    |_/ \_|\___/\____|\____||_| |_|    \____/|_| |_|_____|\____||_|
  *
- *	===============================================================
- *		   More than a coder, More than a designer
- *	===============================================================
+ *    ===============================================================
+ *           More than a coder, More than a designer
+ *    ===============================================================
  *
- *	- Document: init.es6
- *	- Author: aleen42
- *	- Description: An initialization file for building projects,
-                   which has used React, Webpack, Babel, or ESLint
- *	- Create Time: Feb, 23rd, 2018
- *	- Update Time: Feb, 23rd, 2018
+ *    - Document: init.es6
+ *    - Author: aleen42
+ *    - Description: An initialization file for building projects,
+ *    which has used React, Webpack, Babel, or ESLint
+ *    - Create Time: Feb, 23rd, 2018
+ *    - Update Time: Mar, 2nd, 2018
  *
- *****************************************************************/
+ *********************************************************************/
 
 const fs = require('fs');
 const path = require('path');
 
 const moment = require('./lib/moment');
+const prettier = require('./lib/prettier');
+const prettierOpt = { tabWidth: 4, singleQuote: true };
 const stripIndent = require('./lib/strip-indent');
 const opt = require('./lib/node-getopt')
     .create([
@@ -32,7 +34,8 @@ const opt = require('./lib/node-getopt')
         ['w', 'webpack', '\tSpecify using Webpack'],
         ['r', 'react', '\tSpecify using React'],
         ['u', 'unit-test', '\tSpecify using Unit Test'],
-        ['h' , 'help', '\tTutorial for this command']
+        ['s', 'server', '\tSpecify building local server'],
+        ['h', 'help', '\tTutorial for this command']
     ])
     .setHelp(stripIndent(`
         UseAge: node init.es6 -p [Project Path] [--react --eslint --babel --webpack --unit-test]
@@ -74,79 +77,43 @@ if (!opt.options.project) {
                 /** todo: can I get the latest version of each dependencies */
                 devDependencies: ['webpack@1.13.2', 'css-loader@0.23.1', 'style-loader@0.13.1'],
             },
-            files: ['alias.config.js'],
-            extend: () => {
-                if (!fs.existsSync(path.resolve(root, 'webpack.config.js'))) {
-                    fs.writeFileSync(path.resolve(root, 'webpack.config.js'), stripIndent(`
-                        /******************************************************************
-                         *                                                               _
-                         * 	 _____  _                           ____  _                 |_|
-                         *	|  _  |/ \\   ____  ____ __ ___     / ___\\/ \\   __   _  ____  _
-                         *	| |_| || |  / __ \\/ __ \\ '_  \ _ / /    | |___\\ \\ | |/ __ \\| |
-                         *	|  _  || |__. ___/. ___/| | | ||_|\\ \\___ |  _  | |_| |. ___/| |
-                         *	|_/ \\_|\\___/\\____|\\____||_| |_|    \\____/|_| |_|_____|\\____||_|
-                         *
-                         *	===============================================================
-                         *		   More than a coder, More than a designer
-                         *	===============================================================
-                         *
-                         *	- Document: webpack.config.js
-                         *	- Author: aleen42
-                         *	- Description: A configuration file for configuring Webpack
-                         *	- Create Time: ${time}
-                         *	- Update Time: ${time}
-                         *
-                         *****************************************************************/
-                        
-                        const path = require('path');
-                        
-                        module.exports = {
-                            entry: 'index.js',
-                            output: {
-                                path: path.join(__dirname, 'build'),
-                                filename: 'index.js'
-                            },
-                            resolve: {
-                                alias: require('./alias.config.js')
-                            },
-                            resolveLoader: {
-                                alias: {
-                                    text: 'html-loader'
+            files: ['alias.config.js', 'webpack.config.js'],
+            extend: (fileName, content) => {
+                if (fileName === 'webpack.config.js' && !fs.existsSync(path.resolve(root, fileName))) {
+                    return prettier.format(content.replace(/'__\${MODULE}__'/gi, `
+                        {${opt.options.eslint ?`
+                            preLoaders: [
+                                /** eslint */
+                                {
+                                    test: /\\\\.js$/,
+                                    loader: 'eslint-loader',
+                                    exclude: /node_modules/
                                 }
-                            },
-                            module: {${opt.options.eslint ?
-                                `
-                                preLoaders: [
-                                    /** eslint */
-                                    {
-                                        test: /\\.js$/,
-                                        loader: 'eslint-loader',
-                                        exclude: /node_modules/
+                            ],
+                        ` : ''}
+                            loaders: [${opt.options.babel ?
+                        `
+                                /** babel */
+                                {
+                                    test: /\\\\.js${ opt.options.react ? 'x?' : '' } $/,
+                                    loader: 'babel-loader',
+                                    exclude: /node_modules/,
+                                    query: {
+                                        presets: ['es2015'${ opt.options.react ? ', \'react\'' : '' } ]
                                     }
-                                ],
-                                ` : ''}
-                                loaders: [${opt.options.babel ?
-                                    `
-                                    /** babel */
-                                    {
-                                        test: /\\.js${opt.options.react ? 'x?' : ''}$/,
-                                        loader: 'babel-loader',
-                                        exclude: /node_modules/,
-                                        query: {
-                                            presets: ['es2015'${opt.options.react ? ', \'react\'' : ''}]
-                                        }
-                                    },
-                                    ` : ''}
-                                    /** style */
-                                    {
-                                        test: /\\.css/,
-                                        loader: 'style!css?sourceMap'
-                                    }
-                                ]
-                            }
-                        };
-                    `));
+                                },
+                            ` : ''}
+                                /** style */
+                                {
+                                    test: /\\\\.css/,
+                                    loader: 'style!css?sourceMap'
+                                }
+                                                
+                            ]
+                        },`), prettierOpt);
                 }
+
+                return content;
             },
         },
         babel: {
@@ -159,33 +126,29 @@ if (!opt.options.project) {
                 ].concat(opt.options.webpack ? ['babel-loader@6.2.5'] : [])
                     .concat(opt.options.react ? ['babel-preset-react@6.11.1'] : []),
             },
-            extend: () => {
-                if (!fs.existsSync(path.resolve(root, '.babelrc'))
+            files: ['.babelrc'],
+            extend: (fileName, content) => {
+                if (fileName === '.babelrc' && !fs.existsSync(path.resolve(root, fileName))) {
                     /** unit test has to use .babelrc for configurations */
-                    && (opt.options['unit-test']
+                    if (opt.options['unit-test']
                         /** webpack use babel-loader rather than .babelrc when not using unit testing frameworks */
-                        || !opt.options.webpack)
-                ) {
-                    fs.writeFileSync(path.resolve(root, '.babelrc'), stripIndent(`
-                        {
-                            "presets": ["es2015"${opt.options.react ? ', "react"' : ''}],
-                            "plugins": [
-                                ["module-alias", [
-                                    /** { "src": "./src/components", "expose": "components" }, */
-                                ]]
-                            ]
+                        || !opt.options.webpack) {
+                        if (!opt.options.webpack && fs.existsSync(path.resolve(root, 'package.json'))) {
+                            /** set a building script into package.json */
+                            const packageContent = JSON.parse(fs.readFileSync(path.resolve(root, 'package.json'), { encoding: 'utf8' }));
+                            packageContent.scripts = packageContent.scripts || {};
+                            packageContent.scripts.watch = 'node ./node_modules/babel-cli/bin/babel.js -w src -d dist';
+                            packageContent.scripts.build = 'node ./node_modules/babel-cli/bin/babel.js src -d dist';
+                            fs.writeFileSync(path.resolve(root, 'package.json'), JSON.stringify(packageContent, null, 2));
                         }
-                    `));
+
+                        return content.replace(/"__\${PRESETS}__"/gi, `"es2015"${opt.options.react ? ', "react"' : ''}`);
+                    } else {
+                        return '';
+                    }
                 }
 
-                if (!opt.options.webpack && fs.existsSync(path.resolve(root, 'package.json'))) {
-                    /** set a building script into package.json */
-                    const content = JSON.parse(fs.readFileSync(path.resolve(root, 'package.json'), { encoding: 'utf8' }));
-                    content.scripts = content.scripts || {};
-                    content.scripts.watch = 'node ./node_modules/babel-cli/bin/babel.js -w src -d dist';
-                    content.scripts.build = 'node ./node_modules/babel-cli/bin/babel.js src -d dist';
-                    fs.writeFileSync(path.resolve(root, 'package.json'), JSON.stringify(content, null, 2));
-                }
+                return content;
             },
         },
         react: {
@@ -203,7 +166,32 @@ if (!opt.options.project) {
                     'mocha@2.4.5'
                 ].concat(opt.options.babel ? ['babel-register@6.24.1', 'babel-plugin-module-alias@1.6.0'] : []),
             },
-        }
+        },
+        /** Express for building servers */
+        server: {
+            name: 'Server Frameworks',
+            shell: {
+                devDependencies: [
+                    'express'
+                ].concat(opt.options.webpack ? ['webpack-dev-middleware@1.6.1'] : []),
+            } ,
+            files: ['server.js'],
+            extend: (fileName, content) => {
+                if (fileName === 'server.js' && !fs.existsSync(path.resolve(root, fileName))) {
+                    return prettier.format(content.replace(/'__\${WEBPACK}__'/gi, opt.options.webpack ? `
+                        const webpack = require('webpack');
+                        const config = require('./webpack.config.js');
+                        const compiler = webpack(config);
+
+                        app.use(require('webpack-dev-middleware')(compiler, {
+                            /** options */
+                        }));
+                    ` : ''), prettierOpt);
+                }
+
+                return content;
+            },
+        },
     };
 
     /** specific folder */
@@ -222,16 +210,15 @@ if (!opt.options.project) {
 
             /** files */
             func.files && func.files.forEach(item => {
-                !fs.existsSync(path.resolve(root, item))
-                    && fs.writeFileSync(
-                        path.resolve(root, item),
-                        fs.readFileSync(path.resolve(__dirname, `./config/${item}`), { encoding: 'utf8' })
-                            .replace(/__\$\{TIME}__/gi, time)
-                    );
-            });
+                if (!fs.existsSync(path.resolve(root, item))) {
+                    let content = fs.readFileSync(path.resolve(__dirname, `./config/${item}`), { encoding: 'utf8' })
+                        .replace(/__\$\{TIME}__/gi, time);
 
-            /** extend function */
-            func.extend && ({}).toString.call(func.extend) === '[object Function]' && func.extend();
+                    /** extend file contents */
+                    func.extend && ({}).toString.call(func.extend) === '[object Function]' && (content = func.extend(item, content));
+                    content && fs.writeFileSync(path.resolve(root, item), content);
+                }
+            });
 
             /** completed */
             console.log(`init ${func.name} done.`);
