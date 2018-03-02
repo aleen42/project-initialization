@@ -35,6 +35,7 @@ const opt = require('./lib/node-getopt')
         ['r', 'react', '\tSpecify using React'],
         ['u', 'unit-test', '\tSpecify using Unit Test'],
         ['s', 'server', '\tSpecify building local server'],
+        ['d', 'debug', '\tDebug mode'],
         ['h', 'help', '\tTutorial for this command']
     ])
     .setHelp(stripIndent(`
@@ -66,51 +67,53 @@ if (!opt.options.project) {
         eslint: {
             name: 'ESLint',
             shell: {
-                devDependencies: ['eslint@4.16.0', 'eslint-config-aleen42'].concat(opt.options.webpack ? ['eslint-loader'] : []),
+                devDependencies: ['eslint', 'eslint-config-aleen42'].concat(opt.options.webpack ? ['eslint-loader'] : []),
             },
             files: ['.eslintrc.yaml'],
         },
-        /** Webpack 1 */
+        /** Webpack 3.x when using babel */
         webpack: {
             name: 'Webpack',
             shell: {
                 /** todo: can I get the latest version of each dependencies */
-                devDependencies: ['webpack@1.13.2', 'css-loader@0.23.1', 'style-loader@0.13.1'],
+                devDependencies: [opt.options.babel ? 'webpack@3.11.0' : 'webpack', 'css-loader', 'style-loader'],
             },
             files: ['alias.config.js', 'webpack.config.js'],
             extend: (fileName, content) => {
                 if (fileName === 'webpack.config.js' && !fs.existsSync(path.resolve(root, fileName))) {
                     return prettier.format(content.replace(/'__\${MODULE}__'/gi, `
-                        {${opt.options.eslint ?`
-                            preLoaders: [
-                                /** eslint */
-                                {
-                                    test: /\\\\.js$/,
-                                    loader: 'eslint-loader',
-                                    exclude: /node_modules/
+                    {
+                        rules: [${opt.options.eslint ? `
+                            {
+                                test: /\\.js$/,
+                                exclude: /node_modules/,
+                                loader: 'eslint-loader',
+                                options: {
+                                    // eslint options (if necessary)
                                 }
-                            ],
-                        ` : ''}
-                            loaders: [${opt.options.babel ?
-                        `
+                            },` : ''}
+                            
+                            ${opt.options.babel ? `
+                            {
                                 /** babel */
-                                {
-                                    test: /\\\\.js${ opt.options.react ? 'x?' : '' } $/,
+                                test: /\\.js${ opt.options.react ? 'x?' : '' }$/,
+                                exclude: /(node_modules|bower_components)/,
+                                use: {
                                     loader: 'babel-loader',
-                                    exclude: /node_modules/,
-                                    query: {
-                                        presets: ['es2015'${ opt.options.react ? ', \'react\'' : '' } ]
+                                    options: {
+                                        presets: ['@babel/preset-env'${ opt.options.react ? ', \'react\'' : '' }]
                                     }
-                                },
-                            ` : ''}
-                                /** style */
-                                {
-                                    test: /\\\\.css/,
-                                    loader: 'style!css?sourceMap'
                                 }
-                                                
-                            ]
-                        },`), prettierOpt);
+                            },` : ''}
+
+                            {
+                                /** style */
+                                test: /\\.css$/,
+                                use: ['style-loader', 'css-loader']
+                            }
+                        ],
+                    }
+                    `), prettierOpt);
                 }
 
                 return content;
@@ -205,8 +208,11 @@ if (!opt.options.project) {
             console.log(`init ${func.name} for the project`);
 
             /** dependencies */
-            func.shell.dependencies && func.shell.dependencies.length && sh.exec('npm.cmd', 'install', '--save', ...func.shell.dependencies);
-            func.shell.devDependencies && func.shell.devDependencies.length && sh.exec('npm.cmd', 'install', '--save-dev', ...func.shell.devDependencies);
+            if (!opt.options.debug) {
+                /** only install under non-debug mode */
+                func.shell.dependencies && func.shell.dependencies.length && sh.exec('npm.cmd', 'install', '--save', ...func.shell.dependencies);
+                func.shell.devDependencies && func.shell.devDependencies.length && sh.exec('npm.cmd', 'install', '--save-dev', ...func.shell.devDependencies);
+            }
 
             /** files */
             func.files && func.files.forEach(item => {
