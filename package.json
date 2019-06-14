@@ -1,0 +1,33 @@
+{
+  "name": "project-initialization",
+  "version": "1.0.0",
+  "description": "a tool for initing front-end project",
+  "main": "init.es6",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aleen42/project-initialization.git"
+  },
+  "keywords": [
+    "pi",
+    "project"
+  ],
+  "author": "Aleen <aleen42@vip.qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aleen42/project-initialization/issues"
+  },
+  "homepage": "https://github.com/aleen42/project-initialization#readme",
+  "dependencies": {
+    "moment": "^2.24.0",
+    "node-getopt": "^0.3.2",
+    "prettier": "^1.18.2",
+    "strip-indent": "^3.0.0"
+  }
+}

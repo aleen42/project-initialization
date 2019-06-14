@@ -22,11 +22,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const moment = require('./lib/moment');
-const prettier = require('./lib/prettier');
+const moment = require('moment');
+const prettier = require('prettier');
 const prettierOpt = { tabWidth: 4, singleQuote: true };
-const stripIndent = require('./lib/strip-indent');
-const opt = require('./lib/node-getopt')
+const stripIndent = require('strip-indent');
+const opt = require('node-getopt')
     .create([
         ['p', 'project=[Project Path]', '\tThe path of your project'],
         ['e', 'eslint', '\tSpecify using ESLint'],
