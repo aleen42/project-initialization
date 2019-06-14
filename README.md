@@ -1,4 +1,4 @@
-<h2 align="center">PI (Project Initialization)</h2>
+## PI - Project Initialization
 
 ![npm](https://aleen42.github.io/badges/src/npm.svg) ![javascript](https://aleen42.github.io/badges/src/javascript.svg)
 
@@ -18,10 +18,10 @@ node init.es6
 
 For more information about usage of the script, you can pass it a parameter `-h` or `--help`.
 
-### :fuelpump: How to contribute
+#### :fuelpump: How to contribute
 
 Have an idea? Found a bug? See [how to contribute](https://aleen42.github.io/PersonalWiki/contribution.html).
 
-### :scroll: License
+#### :scroll: License
 
 [MIT](https://aleen42.github.io/PersonalWiki/MIT.html) © aleen42
